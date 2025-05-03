@@ -12,7 +12,7 @@ const navigation = {
   products: [
     { name: "Best Sellers", href: "/category/best-sellers" },
     { name: "Watersports", href: "/category/water-sports" },
-    { name: "Entertainments", href: "/category/entertainments" },
+    { name: "Entertainment", href: "/category/entertainment" },
     { name: "Sportsman", href: "/category/sportsman" },
     { name: "Dock Essentials", href: "/category/dock-essentials" },
   ],
@@ -23,7 +23,7 @@ const navigation = {
   ],
   help: [
     { name: "How-To Videos", href: "/how-to-dockbloxx" },
-    { name: "Shipping & Returns", href: "/refunds" },
+    { name: "Shipping & Returns", href: "/returns" },
     { name: "Privacy Policy", href: "/privacy" },
     { name: "Terms & Conditions", href: "/terms" },
   ],
