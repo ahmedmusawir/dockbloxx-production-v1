@@ -14,7 +14,6 @@
  * This approach ensures a non-blocking, efficient process for handling backend
  * operations while keeping the client-side components lightweight.
  */
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.scss";
 import Navbar from "@/components/global/Navbar";
@@ -26,10 +25,16 @@ import { fetchTrackingScripts } from "@/services/trackingSeoServices";
 
 const inter = Inter({ subsets: ["latin"] });
 
-// /lib/stripScriptWrapper.ts
+// For header script cleanup
 export const stripScriptWrapper = (html: string): string => {
   const match = html.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
   return match ? match[1].trim() : html.trim(); // fallback: untouched
+};
+
+// For body html cleanup
+export const stripNoscriptWrapper = (html: string): string => {
+  const match = html.match(/<noscript[^>]*>([\s\S]*?)<\/noscript>/i);
+  return match ? match[1].trim() : html.trim();
 };
 
 export default async function RootLayout({
@@ -41,7 +46,7 @@ export default async function RootLayout({
 
   // remove wrapper if WP still sends `<script …>`
   const headerJS = stripScriptWrapper(header);
-  const bodyJS = stripScriptWrapper(body);
+  const bodyHtml = stripNoscriptWrapper(body);
 
   // console.log("TRACKING SCRIPTS HEADER: [/app/layout.tsx]", headerJS);
   // console.log("TRACKING SCRIPTS BODY: [/app/layout.tsx]", bodyJS);
@@ -70,10 +75,9 @@ export default async function RootLayout({
 
         {/* <Toaster /> */}
         {/* Body‑level tracker */}
-        <Script
+        <div
           id="moose-tracker-body"
-          strategy="afterInteractive" // key line
-          dangerouslySetInnerHTML={{ __html: bodyJS }}
+          dangerouslySetInnerHTML={{ __html: bodyHtml }}
         />
       </body>
     </html>
