@@ -8,6 +8,7 @@ import OrderDetailsMobile from "./OrderDetailsMobile";
 import { Dialog } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/common/Spinner";
+import { useCheckoutTracking } from "@/hooks/useCheckoutTracking";
 
 const RightPane = () => {
   const {
@@ -23,8 +24,9 @@ const RightPane = () => {
     calculateTotals,
     setShippingMethod,
     setCoupon,
-    isHydrated,
   } = useCheckoutStore();
+
+  const { trackBeginCheckout } = useCheckoutTracking(); // FOR TRACKING CHECKOUT DATA
   const router = useRouter();
 
   // console.log("shipping cost [RightPane.tsx]", checkoutData.shippingCost);
@@ -52,6 +54,19 @@ const RightPane = () => {
     // 2) Re-trigger the discount logic so it's accurate
     //    We'll just call setCoupon again, which re-sets the discountTotal
     setCoupon(checkoutData.coupon);
+  }, []);
+
+  // Fire GTM "begin_checkout" event only once
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      trackBeginCheckout(
+        cartItems.map((item) => ({
+          product_id: item.id,
+          variation_id: item.variation_id,
+          quantity: item.quantity,
+        }))
+      );
+    }
   }, []);
 
   const shipping = checkoutData.shippingCost || 0;

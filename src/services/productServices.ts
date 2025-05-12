@@ -52,33 +52,6 @@ export const fetchPaginatedProducts = async (
   };
 };
 
-// export const fetchPaginatedProducts = async (
-//   page: number = 1,
-//   perPage: number = 12
-// ): Promise<{ products: Product[]; totalProducts: number }> => {
-//   const url = `${BASE_URL}/api/get-all-products?page=${page}&perPage=${perPage}`;
-
-//   // console.log("Fetching products from API route:", url);
-
-//   const response = await fetch(url, {
-//     method: "GET",
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//   });
-
-//   if (!response.ok) {
-//     throw new Error(`Failed to fetch products: ${response.statusText}`);
-//   }
-
-//   const data = await response.json();
-
-//   // Destructure products and totalProducts from the API response
-//   const { products, totalProducts } = data;
-
-//   return { products, totalProducts };
-// };
-
 // --------------------------- FETCH PAGINATED PRODUCTS CLIENT SIDE ENDS ----------------------------------------
 
 // --------------------------- FETCH INITIAL PRODUCTS START ----------------------------------------
