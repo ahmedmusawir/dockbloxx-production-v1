@@ -13,6 +13,8 @@ import { OrderPayload, OrderSummary } from "@/types/order";
 
 export const useCheckoutTracking = () => {
   const trackBeginCheckout = (lineItems: OrderPayload["line_items"]) => {
+    if (process.env.NODE_ENV !== "production") return;
+
     trackEvent({
       event: "begin_checkout",
       ecommerce: {
@@ -25,6 +27,8 @@ export const useCheckoutTracking = () => {
   };
 
   const trackPurchase = (order: OrderSummary) => {
+    if (process.env.NODE_ENV !== "production") return;
+
     trackEvent({
       event: "purchase",
       ecommerce: {

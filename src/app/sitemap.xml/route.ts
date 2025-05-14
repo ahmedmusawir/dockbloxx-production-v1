@@ -20,7 +20,7 @@ export async function GET() {
   <url><loc>https://dockbloxx.com/blog</loc></url>
   <url><loc>https://dockbloxx.com/dealer-locator</loc></url>
   <url><loc>https://dockbloxx.com/dealer-login</loc></url>
-  <url><loc>https://dockbloxx.com/how-to-dockbloxx</loc></url>
+  <url><loc>https://dockbloxx.com/how-to</loc></url>
   <url><loc>https://dockbloxx.com/contact</loc></url>
   <url><loc>https://dockbloxx.com/terms</loc></url>
   <url><loc>https://dockbloxx.com/privacy</loc></url>

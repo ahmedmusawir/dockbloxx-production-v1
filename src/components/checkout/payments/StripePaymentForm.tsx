@@ -100,7 +100,6 @@ const StripePaymentForm = () => {
       setIsOrderModalOpen(true); // Show the modal on error
       setModalMessage("Order creation failed. Please try again."); // Set an appropriate error message
     }
-    // No finally block
   };
 
   // Process Stripe Payments making calls to Stripe API
@@ -109,10 +108,14 @@ const StripePaymentForm = () => {
     orderInfo: OrderSummary
   ): Promise<boolean> => {
     // Payment submission function
-    console.log(
-      "checkout total: [StripePaymentForm.tsx - processPayment]",
-      checkoutData.total
-    );
+    // console.log(
+    //   "checkout total: [StripePaymentForm.tsx - processPayment]",
+    //   checkoutData.total
+    // );
+
+    const { email, phone, first_name, last_name } = orderInfo.billing || {};
+    const fullName = `${first_name ?? ""} ${last_name ?? ""}`.trim();
+
     try {
       const response = await fetch("/api/create-payment-intent", {
         method: "POST",
@@ -121,6 +124,9 @@ const StripePaymentForm = () => {
           amount: Math.round(checkoutData.total * 100),
           currency: "usd",
           orderId: orderInfo.id, // Now orderInfo.id will be available.
+          email,
+          name: fullName,
+          phone,
         }),
       });
       const { clientSecret } = await response.json();
@@ -132,6 +138,13 @@ const StripePaymentForm = () => {
           clientSecret,
           confirmParams: {
             return_url: `${SITE_URL}/thankyou`,
+            payment_method_data: {
+              billing_details: {
+                name: fullName,
+                email,
+                phone,
+              },
+            },
           },
           redirect: "if_required",
         });
