@@ -9,6 +9,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/common/Spinner";
 import { useCheckoutTracking } from "@/hooks/useCheckoutTracking";
+import CustomerComments from "./CustomerComments";
 
 const RightPane = () => {
   const {
@@ -108,6 +109,9 @@ const RightPane = () => {
           editInCart={editInCart}
         />
       </Dialog>
+
+      {/* Customer Comments */}
+      <CustomerComments />
     </div>
   );
 };

@@ -154,7 +154,7 @@ const Navbar = () => {
           {/* Secondary Nav */}
 
           <div className="flex items-center space-x-4 text-xs text-gray-600">
-            <Link href="/shop" className="hover:text-blue-600">
+            <Link href="/search" className="hover:text-blue-600">
               Search Products
             </Link>
             <span className="border-r border-gray-300 h-4" />

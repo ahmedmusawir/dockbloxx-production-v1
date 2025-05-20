@@ -79,7 +79,7 @@ export default function MobileNavOverlay({ onClose }: MobileNavOverlayProps) {
 
         {/* Secondary Nav */}
         <nav className="flex flex-col space-y-3 text-base font-normal pl-[100px]">
-          <MobileNavItem href="/shop" onClose={onClose}>
+          <MobileNavItem href="/search" onClose={onClose}>
             Search Products
           </MobileNavItem>
           <MobileNavItem href="/about" onClose={onClose}>

@@ -71,6 +71,7 @@ const StripePaymentForm = () => {
         discountTotal: orderResponse.discount_total,
         billing: orderResponse.billing,
         shipping: orderResponse.shipping,
+        customer_note: orderResponse.customer_note,
         line_items: orderResponse.line_items.map((item: any) => ({
           id: item.id,
           name: item.name,

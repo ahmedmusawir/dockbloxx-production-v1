@@ -27,6 +27,7 @@ export interface OrderSummary {
     country: string;
     phone: string;
   };
+  customer_note: string;
   line_items: Array<{
     id: number;
     name: string;
