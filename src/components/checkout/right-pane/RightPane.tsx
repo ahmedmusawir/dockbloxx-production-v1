@@ -89,7 +89,8 @@ const RightPane = () => {
   return (
     <div className="mt-10 lg:mt-0">
       {/* Desktop Order Summary */}
-      <div className="hidden lg:block">
+      {/* <div className="hidden lg:block"> */}
+      <div className="">
         <OrderDetailsDesktop
           checkoutData={checkoutData}
           cartSubtotal={cartSubtotal}
@@ -100,7 +101,7 @@ const RightPane = () => {
       </div>
 
       {/* Mobile Order Summary - Dialog */}
-      <Dialog>
+      {/* <Dialog>
         <OrderDetailsMobile
           checkoutData={checkoutData}
           cartSubtotal={cartSubtotal}
@@ -108,7 +109,7 @@ const RightPane = () => {
           total={total}
           editInCart={editInCart}
         />
-      </Dialog>
+      </Dialog> */}
 
       {/* Customer Comments */}
       <CustomerComments />
