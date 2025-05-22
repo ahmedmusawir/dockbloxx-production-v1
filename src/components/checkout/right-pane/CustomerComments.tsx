@@ -37,7 +37,7 @@ const CustomerComments = () => {
 
       <Button
         onClick={handleSave}
-        disabled={!customerNote.trim()}
+        disabled={!(customerNote ?? "").trim()}
         size="sm"
         className="bg-blue-600 text-white py-4 px-4 hover:bg-blue-500 rounded-none"
       >

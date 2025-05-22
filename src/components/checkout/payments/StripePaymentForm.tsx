@@ -115,7 +115,9 @@ const StripePaymentForm = () => {
     // );
 
     const { email, phone, first_name, last_name } = orderInfo.billing || {};
-    const fullName = `${first_name ?? ""} ${last_name ?? ""}`.trim();
+    const fullName = `${(first_name ?? "").trim()} ${(
+      last_name ?? ""
+    ).trim()}`.trim();
 
     try {
       const response = await fetch("/api/create-payment-intent", {
