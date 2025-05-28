@@ -39,13 +39,17 @@ export interface OrderSummary {
 }
 
 export interface OrderPayload {
+  id: number; // <-- Woo order id
   payment_method: string;
   payment_method_title: string;
   set_paid: boolean;
   billing: CheckoutData["billing"];
   shipping: CheckoutData["shipping"];
+  total: string; // <-- Woo always sends as string
   line_items: Array<{
     product_id: number;
+    name?: string; // <-- Optional, but useful for tracking
+    price?: string; // <-- Optional, but useful for tracking
     variation_id?: number;
     quantity: number;
   }>;
@@ -56,5 +60,11 @@ export interface OrderPayload {
   }>;
   coupon_lines?: Array<{
     code: string;
+    discount?: string;
+    discount_tax?: string;
+    discount_type?: string;
+    free_shipping?: boolean;
+    id?: number;
+    [key: string]: any; // Catch all for meta_data, etc.
   }>;
 }

@@ -11,6 +11,7 @@ import { createWoocomOrder, updateWoocomOrder } from "@/services/orderServices";
 import { OrderSummary } from "@/types/order";
 import { useCartStore } from "@/store/useCartStore";
 import { useRouter } from "next/navigation";
+import { useCheckoutTracking } from "@/hooks/useCheckoutTracking";
 
 const StripePaymentForm = () => {
   const SITE_URL = process.env.NEXT_PUBLIC_APP_URL;
@@ -31,6 +32,9 @@ const StripePaymentForm = () => {
   // CANCEL ORDER RELATED:
   const [isCancelling, setIsCancelling] = useState(false);
 
+  // PAYMENT TRACKING HOOK FOR STAPE
+  const { trackAddPaymentInfo } = useCheckoutTracking();
+
   //Early return if stripe isn't loaded.
   if (!stripe) {
     console.log("Stripe is not loaded yet (early return)");
@@ -44,6 +48,9 @@ const StripePaymentForm = () => {
 
     setIsProcessing(true);
     setError(null);
+
+    // Track GTM "add_payment_info" for analytics (fires before payment starts)
+    trackAddPaymentInfo(checkoutData);
 
     const submitResult = await elements.submit();
     if (submitResult.error) {
@@ -79,7 +86,7 @@ const StripePaymentForm = () => {
           price: item.total,
           image: item.image?.src,
         })),
-        coupon: orderResponse.coupon_lines,
+        coupon: orderResponse.coupon_lines[0].code,
       };
 
       console.log("Simplified Order Object:", orderObject);
@@ -108,12 +115,6 @@ const StripePaymentForm = () => {
     elements: any,
     orderInfo: OrderSummary
   ): Promise<boolean> => {
-    // Payment submission function
-    // console.log(
-    //   "checkout total: [StripePaymentForm.tsx - processPayment]",
-    //   checkoutData.total
-    // );
-
     const { email, phone, first_name, last_name } = orderInfo.billing || {};
     const fullName = `${(first_name ?? "").trim()} ${(
       last_name ?? ""
