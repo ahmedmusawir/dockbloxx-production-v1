@@ -86,7 +86,7 @@ const StripePaymentForm = () => {
           price: item.total,
           image: item.image?.src,
         })),
-        coupon: orderResponse.coupon_lines[0].code,
+        coupon: orderResponse.coupon_lines?.[0]?.code ?? null,
       };
 
       console.log("Simplified Order Object:", orderObject);
