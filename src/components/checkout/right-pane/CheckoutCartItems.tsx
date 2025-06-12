@@ -3,6 +3,7 @@
 import { CartItem } from "@/types/cart";
 import React from "react";
 import { useRouter } from "next/navigation";
+import { useCartStore } from "@/store/useCartStore";
 
 interface Props {
   cartData: CartItem[];
@@ -10,11 +11,7 @@ interface Props {
 
 const CheckoutCartItems = ({ cartData }: Props) => {
   const router = useRouter();
-
-  // Redirect to shop if cart is empty
-  const editInCart = () => {
-    router.push("/cart");
-  };
+  const { makeKey } = useCartStore();
 
   return (
     <>
@@ -22,7 +19,7 @@ const CheckoutCartItems = ({ cartData }: Props) => {
       <ul role="list" className="divide-y divide-gray-200">
         {cartData.length > 0 &&
           cartData.map((product) => (
-            <li key={product.id} className="flex px-4 py-6 sm:px-6">
+            <li key={makeKey(product)} className="flex px-4 py-6 sm:px-6">
               <div className="shrink-0">
                 <img
                   alt={product.name}
@@ -40,9 +37,12 @@ const CheckoutCartItems = ({ cartData }: Props) => {
                       {product.categories.map((c) => c.name).join(" · ")}
                     </p>
 
-                    {/* <p className="mt-1 text-sm text-gray-500">
-                      {product.categories.map((cat) => cat.name)}
-                    </p> */}
+                    <p className="my-2 text-xs text-gray-500 font-bold">
+                      {product.variations
+                        .filter((c) => c.value !== "Unknown")
+                        .map((c) => c.value)
+                        .join(" · ")}
+                    </p>
                   </div>
                 </div>
                 <div className="flex flex-1 items-end justify-between pt-2">

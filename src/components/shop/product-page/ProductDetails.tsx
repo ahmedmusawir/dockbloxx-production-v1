@@ -19,6 +19,7 @@ import { useCartStore } from "@/store/useCartStore";
 import MobileProductSlider from "./mobile/MobileProductSlider";
 import ProductShortDescription from "./ProductShortDescription";
 import StaticLogoBlock from "./StaticLogoBlock";
+import { useProductTracking } from "@/hooks/useProductTracking";
 
 interface Props {
   product: Product;
@@ -30,6 +31,7 @@ const ProductDetails = ({ product }: Props) => {
     type: string;
   } | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const { trackAddToCart } = useProductTracking();
 
   // Add CartItem state to the component
   const [cartItem, setCartItem] = useState<CartItem>({
@@ -85,7 +87,9 @@ const ProductDetails = ({ product }: Props) => {
 
   // Add this function inside the ProductDetails component
   const handleAddToCart = () => {
-    const { setCartItems, setIsCartOpen } = useCartStore.getState();
+    // const { addOrUpdateCartItem, setIsCartOpen } = useCartStore.getState();
+    const { setOrReplaceCartItemQuantity, setIsCartOpen } =
+      useCartStore.getState();
 
     /* -------------------- 1 · Pole-size validation -------------------- */
     const poleSizeVariation = cartItem.variations?.find(
@@ -114,20 +118,18 @@ const ProductDetails = ({ product }: Props) => {
     };
 
     /* -------------------- 3 · Push into Zustand ----------------------- */
-    setCartItems((prevItems: CartItem[]) => {
-      const existing = prevItems.find((i) => i.id === itemToStore.id);
-
-      if (existing) {
-        // increment quantity
-        return prevItems.map((i) =>
-          i.id === itemToStore.id
-            ? { ...i, quantity: i.quantity + itemToStore.quantity }
-            : i
-        );
-      }
-      // add brand-new item
-      return [...prevItems, itemToStore];
-    });
+    setOrReplaceCartItemQuantity(itemToStore);
+    /* -------------------- 4 · Track & Open mini-cart ------------------ */
+    trackAddToCart(
+      {
+        id: itemToStore.id,
+        name: itemToStore.name,
+        category: cartItem.categories[0].name || "Uncategorized",
+        brand: "Dockbloxx",
+        price: itemToStore.basePrice,
+      },
+      itemToStore.quantity
+    );
 
     /* -------------------- 4 · Open mini-cart & debug ------------------ */
     setIsCartOpen(true);
