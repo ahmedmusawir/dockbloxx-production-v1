@@ -1,6 +1,7 @@
 import { WC_REST_URL } from "@/constants/apiEndpoints";
 import { CheckoutData } from "@/types/checkout";
 import { NextResponse } from "next/server";
+import { parseCouponMeta } from "@/lib/couponUtils";
 
 const BASE_URL = WC_REST_URL;
 const CONSUMER_KEY = process.env.WOOCOM_CONSUMER_KEY;
@@ -17,10 +18,35 @@ export async function POST(req: Request) {
   try {
     const checkoutData: CheckoutData = await req.json();
 
-    // console.log(
-    //   "DEBUG: Transformed Checkout cartItems [place-order/route.ts]",
-    //   checkoutData.cartItems
-    // );
+    console.log("🔍 [place-order] Received cartItems:", 
+      checkoutData.cartItems.map(item => ({
+        id: item.id,
+        basePrice: item.basePrice,
+        quantity: item.quantity,
+        discountApplied: item.discountApplied,
+        isFree: item.isFree
+      }))
+    );
+
+    // Check if coupon is a custom per-product percentage type
+    // Custom coupons use fee_lines, native WooCommerce coupons use coupon_lines
+    const isCustomPercentageCoupon = checkoutData.coupon 
+      ? parseCouponMeta(checkoutData.coupon).percentPerProduct !== undefined
+      : false;
+    
+    // Native fixed_product discount uses coupon_lines (WooCommerce handles it)
+    const isNativeFixedProductCoupon = checkoutData.coupon
+      ? checkoutData.coupon.discount_type === "fixed_product" && 
+        checkoutData.coupon.products_included.length > 0
+      : false;
+    
+    console.log("🎫 [Coupon Type Check]:", {
+      hasCoupon: !!checkoutData.coupon,
+      couponCode: checkoutData.coupon?.code,
+      isCustomPercentageCoupon,
+      isNativeFixedProductCoupon,
+      discountTotal: checkoutData.discountTotal
+    });
 
     // Transform order structure to match WooCommerce API
     // In your POST handler, update the orderData transformation:
@@ -39,6 +65,23 @@ export async function POST(req: Request) {
           })
         );
 
+        // Calculate the price after discount (if any)
+        const itemTotal = item.basePrice * item.quantity;
+        const discountApplied = item.discountApplied || 0;
+        const priceAfterDiscount = (itemTotal - discountApplied) / item.quantity;
+
+        console.log(`💰 [Item ${item.id}] Calculation:`, {
+          basePrice: item.basePrice,
+          quantity: item.quantity,
+          itemTotal,
+          discountApplied,
+          priceAfterDiscount,
+          isCustomPercentageCoupon,
+          isNativeFixedProductCoupon
+        });
+
+        // For custom coupons, send full price and let fee_lines handle discount
+        // For standard coupons, send full price and let WooCommerce handle discount
         return {
           product_id: item.id,
           quantity: item.quantity,
@@ -70,19 +113,47 @@ export async function POST(req: Request) {
           total: checkoutData.shippingCost.toFixed(2),
         },
       ],
-      coupon_lines: checkoutData.coupon
+      // Coupon handling logic:
+      // 1. Native WooCommerce coupons (fixed_cart, percent, fixed_product) → coupon_lines
+      // 2. Custom percentage per product → fee_lines
+      coupon_lines: checkoutData.coupon && 
+                    !isCustomPercentageCoupon && 
+                    (isNativeFixedProductCoupon || 
+                     checkoutData.coupon.discount_type === "fixed_cart" || 
+                     checkoutData.coupon.discount_type === "percent")
         ? [
             {
               code: checkoutData.coupon.code,
-              used_by: checkoutData.billing.email, // Track who used it
+              used_by: checkoutData.billing.email,
+            },
+          ]
+        : [],
+      // For custom percentage coupons, add discount as a negative fee line
+      fee_lines: checkoutData.coupon && isCustomPercentageCoupon && checkoutData.discountTotal > 0
+        ? [
+            {
+              name: `Coupon: ${checkoutData.coupon.code}`,
+              total: `-${checkoutData.discountTotal.toFixed(2)}`,
+              tax_status: "none",
             },
           ]
         : [],
     };
 
     console.log(
-      "DEBUG: Transformed Order line_items [place-order/route.ts]",
-      orderData
+      "DEBUG: Transformed Order Data [place-order/route.ts]",
+      JSON.stringify(orderData, null, 2)
+    );
+    
+    console.log(
+      "DEBUG: Line Items with Discounts:",
+      orderData.line_items.map((item: any) => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        subtotal: item.subtotal,
+        total: item.total,
+        discount: (parseFloat(item.subtotal) - parseFloat(item.total)) * item.quantity,
+      }))
     );
 
     // Validate required fields
@@ -119,6 +190,20 @@ export async function POST(req: Request) {
     }
 
     const data = await response.json();
+    
+    console.log("🎉 [WooCommerce Response] Order created:", {
+      id: data.id,
+      total: data.total,
+      discount_total: data.discount_total,
+      line_items: data.line_items.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        subtotal: item.subtotal,
+        total: item.total,
+      }))
+    });
+    
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
     console.error("Order Submission Error:", error);
